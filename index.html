@@ -49,7 +49,7 @@
     }
     .title{ display:flex; flex-direction: column; gap:6px; min-width: 240px; }
     h1{ margin:0; font-size: 18px; letter-spacing: .2px; line-height: 1.1; }
-    .subtitle{ margin:0; font-size: 13px; color: var(--muted); line-height: 1.35; max-width: 70ch; }
+    .subtitle{ margin:0; font-size: 13px; color: var(--muted); line-height: 1.35; max-width: 76ch; }
 
     .pill{
       display:inline-flex; align-items:center; gap:8px; padding: 8px 10px;
@@ -273,9 +273,8 @@
       <div class="title">
         <h1>Contador de Bichos 🧮🐾</h1>
         <p class="subtitle">
-          Cole a lista. Selecione os bichos que saíram <b>hoje</b>.
-          O sistema soma <b>+N</b> dias (conforme sua opção) em todos.
-          Se você usar +3/+4/+7, os selecionados ficam com <b>N dias</b> (não ficam como ONTEM).
+          Agora também entende linhas com <span class="kbd">DATA</span> no final, e <b>mantém a data sem alterar</b>.
+          Ex.: <span class="kbd">Carneiro 360 dias – 09/01</span> ou <span class="kbd">04 BORBOLETA - 20 DIAS – 09/01</span>
         </p>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
@@ -289,14 +288,14 @@
         <div class="cardHead">
           <div>
             <p class="cardTitle">Lista atual</p>
-            <p class="hint">Ex.: <span class="kbd">04 BORBOLETA - 20 DIAS</span> ou <span class="kbd">22 TIGRE - ONTEM</span></p>
+            <p class="hint">Formatos aceitos: com código (<span class="kbd">04 BORBOLETA - 20 DIAS</span>) ou só nome (<span class="kbd">Carneiro 360 dias – 09/01</span>).</p>
           </div>
         </div>
 
         <div class="cardBody">
           <textarea id="lista" placeholder="Cole sua lista aqui..."></textarea>
           <div class="mini">
-            Dica: <b>ONTEM</b> conta como <b>0</b>. Se você escolher +3, ONTEM vira <span class="kbd">03 DIAS</span>.
+            Dica: <b>ONTEM</b> conta como <b>0</b>. Se a linha tiver <b>data</b> no final, ela é mantida sem alteração.
           </div>
         </div>
       </section>
@@ -382,31 +381,85 @@
         {code:"25", name:"VACA"}
       ];
 
+      const byNameNorm = new Map(BICHOS.map(b => [normName(b.name), b]));
+
       function pad2(n){ return String(n).padStart(2,'0'); }
 
-      function parseLine(line){
-        const m = line.trim().match(/^(\d{1,2})\s+(.+?)\s*-\s*(.+?)\s*$/i);
-        if(!m) return null;
-
-        const code = pad2(parseInt(m[1],10));
-        const name = m[2].trim().replace(/\s+/g,' ');
-        const rhs = m[3].trim();
-
-        if(/^ontem$/i.test(rhs)) return { code, name, days: 0 };
-
-        const d = rhs.match(/(\d+)\s*dias?$/i);
-        if(d) return { code, name, days: parseInt(d[1],10) };
-
-        const d2 = rhs.match(/^(\d+)$/);
-        if(d2) return { code, name, days: parseInt(d2[1],10) };
-
-        return { code, name, days: NaN, raw: rhs };
+      function normName(s){
+        return (s || "")
+          .trim()
+          .toUpperCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^A-Z0-9\s]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
       }
 
-      function formatDays(days){
+      function extractDateTail(line){
+        // aceita: " – 09/01" ou " - 09/01" no FINAL
+        const m = line.match(/\s*([–—-])\s*(\d{1,2}\/\d{1,2})\s*$/);
+        if(!m) return { core: line, date: null };
+        const date = m[2];                 // mantém exatamente "DD/MM" como veio
+        const core = line.slice(0, m.index).trim();
+        return { core, date };
+      }
+
+      function parseLine(line){
+        const raw = line.trim();
+        if(!raw) return null;
+
+        const { core, date } = extractDateTail(raw);
+
+        // FORMATO A: "04 BORBOLETA - 20 DIAS" (com ou sem data já removida)
+        const mA = core.match(/^(\d{1,2})\s+(.+?)\s*-\s*(.+?)\s*$/i);
+        if(mA){
+          const code = pad2(parseInt(mA[1],10));
+          const name = mA[2].trim().replace(/\s+/g,' ');
+          const rhs = mA[3].trim();
+
+          if(/^ontem$/i.test(rhs)) return { style:"A", code, name, days: 0, date };
+          const d = rhs.match(/(\d+)\s*dias?$/i);
+          if(d) return { style:"A", code, name, days: parseInt(d[1],10), date };
+          const d2 = rhs.match(/^(\d+)$/);
+          if(d2) return { style:"A", code, name, days: parseInt(d2[1],10), date };
+
+          return { style:"A", code, name, days: NaN, raw: rhs, date };
+        }
+
+        // FORMATO B: "Carneiro 360 dias" (com data já removida)
+        const mB = core.match(/^(.+?)\s+(\d+)\s*dias?$/i);
+        if(mB){
+          const nameIn = mB[1].trim().replace(/\s+/g,' ');
+          const days = parseInt(mB[2],10);
+          const b = byNameNorm.get(normName(nameIn));
+          const code = b ? b.code : null;
+          const name = b ? b.name : nameIn;  // usa nome padronizado se reconheceu
+          return { style:"B", code, name, days, date };
+        }
+
+        // FORMATO B2: "Carneiro ONTEM" (se alguém usar)
+        const mB2 = core.match(/^(.+?)\s+ontem$/i);
+        if(mB2){
+          const nameIn = mB2[1].trim().replace(/\s+/g,' ');
+          const b = byNameNorm.get(normName(nameIn));
+          const code = b ? b.code : null;
+          const name = b ? b.name : nameIn;
+          return { style:"B", code, name, days: 0, date };
+        }
+
+        return null;
+      }
+
+      function formatDaysA(days){
         if(days === 0) return "ONTEM";
         if(days === 1) return "01 DIA";
         return `${pad2(days)} DIAS`;
+      }
+
+      function formatDaysB(days){
+        const n = Number(days) || 0;
+        return `${n} dia${n === 1 ? "" : "s"}`; // 1 dia / 2 dias / 0 dias
       }
 
       function stableSort(arr, keyFn, desc=true){
@@ -432,38 +485,55 @@
           items.push(parsed);
         }
 
+        // índices por código e por nome (pra funcionar mesmo se colou sem número)
         const byCode = new Map();
-        for(const it of items) byCode.set(it.code, it);
+        const byName = new Map();
+        for(const it of items){
+          if(it.code) byCode.set(it.code, it);
+          byName.set(normName(it.name), it);
+        }
 
         // Soma +inc em todos
         for(const it of items) it.days = it.days + inc;
 
-        // Regra pedida:
-        // - Se inc=1: selecionados viram ONTEM (0)
-        // - Se inc>1: selecionados ficam com inc dias (ex: 03 DIAS), não ONTEM
+        // Regra dos selecionados:
+        // - inc=1: selecionados viram 0
+        // - inc>1: selecionados viram inc
         const winnersSet = new Set(winnersCodesInOrder);
         const missing = [];
         for(const code of winnersSet){
-          const it = byCode.get(code);
+          let it = byCode.get(code);
+          if(!it){
+            // tenta achar pelo nome do botão (caso a lista tenha vindo sem código)
+            const b = BICHOS.find(x => x.code === code);
+            if(b) it = byName.get(normName(b.name));
+          }
           if(!it){ missing.push(code); continue; }
           it.days = (inc === 1) ? 0 : inc;
+          // IMPORTANTE: data é mantida SEM ALTERAR (não mexemos em it.date)
         }
 
-        // Ordenação: dias desc; ONTEM no final
+        // Ordenação: dias desc; zeros no final
         const nonZero = items.filter(it => it.days > 0);
         const zeros = items.filter(it => it.days === 0);
 
         const sortedNonZero = stableSort(nonZero, it => it.days, true);
 
+        // mantém ordem de selecionados apenas quando ficam em zero (inc=1)
         const order = new Map(winnersCodesInOrder.map((c,idx)=>[c,idx]));
         const sortedZeros = zeros
-          .map((it, i)=>({it, i, k: order.has(it.code) ? order.get(it.code) : 9999 + i}))
+          .map((it, i)=>({it, i, k: (it.code && order.has(it.code)) ? order.get(it.code) : 9999 + i}))
           .sort((a,b)=>a.k - b.k)
           .map(x=>x.it);
 
-        const out = [...sortedNonZero, ...sortedZeros]
-          .map(it => `${it.code} ${it.name} - ${formatDays(it.days)}`)
-          .join("\n");
+        const out = [...sortedNonZero, ...sortedZeros].map(it => {
+          const datePart = it.date ? ` – ${it.date}` : "";
+          if(it.style === "B"){
+            return `${it.name} ${formatDaysB(it.days)}${datePart}`;
+          }
+          // estilo A
+          return `${it.code || ""}${it.code ? " " : ""}${it.name} - ${formatDaysA(it.days)}${datePart}`.trim();
+        }).join("\n");
 
         return { out, badLines, badDays, missing, winners: [...winnersSet] };
       }
@@ -531,7 +601,7 @@
           warns.push("Linhas que não reconheci (verifique o formato):\n- " + res.badLines.join("\n- "));
         }
         if(res.badDays.length){
-          warns.push("Linhas com contagem inválida (use 'NN DIAS' ou 'ONTEM'):\n- " + res.badDays.join("\n- "));
+          warns.push("Linhas com contagem inválida:\n- " + res.badDays.join("\n- "));
         }
         if(res.missing.length){
           warns.push("Atenção: alguns selecionados não estavam na lista colada:\n- " + res.missing.join(", "));
@@ -540,11 +610,12 @@
 
         const ok = [];
         if(inc === 1){
-          ok.push("Atualizado: +1 dia em todos; selecionados de hoje viraram ONTEM.");
+          ok.push("Atualizado: +1 dia em todos; selecionados de hoje ficaram em 0 (ONTEM no estilo com código).");
         }else{
           const incTxt = String(inc).padStart(2,"0");
           ok.push(`Atualizado: +${inc} dias em todos; selecionados de hoje ficaram com ${incTxt} DIAS.`);
         }
+        ok.push("Datas no final (DD/MM) foram mantidas sem alteração.");
         if(res.winners.length) ok.push("Selecionados (hoje): " + res.winners.join(", "));
         setMsg($("msgOk"), ok.join("\n"));
       });
