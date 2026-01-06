@@ -49,7 +49,7 @@
     }
     .title{ display:flex; flex-direction: column; gap:6px; min-width: 240px; }
     h1{ margin:0; font-size: 18px; letter-spacing: .2px; line-height: 1.1; }
-    .subtitle{ margin:0; font-size: 13px; color: var(--muted); line-height: 1.35; max-width: 68ch; }
+    .subtitle{ margin:0; font-size: 13px; color: var(--muted); line-height: 1.35; max-width: 70ch; }
 
     .pill{
       display:inline-flex; align-items:center; gap:8px; padding: 8px 10px;
@@ -80,7 +80,7 @@
 
     .card{
       background: var(--card); border: 1px solid var(--line); border-radius: 16px;
-      box-shadow: 0 10px 26px rgba(15, 23, 42, .10); overflow:hidden;
+      box-shadow: var(--shadow); overflow:hidden;
     }
     .cardHead{
       padding: 12px 12px 10px; border-bottom: 1px solid var(--line);
@@ -274,7 +274,8 @@
         <h1>Contador de Bichos 🧮🐾</h1>
         <p class="subtitle">
           Cole a lista. Selecione os bichos que saíram <b>hoje</b>.
-          O sistema soma <b>+N</b> dias (conforme sua opção) em todos e coloca os vencedores como <b>ONTEM</b> (no final).
+          O sistema soma <b>+N</b> dias (conforme sua opção) em todos.
+          Se você usar +3/+4/+7, os selecionados ficam com <b>N dias</b> (não ficam como ONTEM).
         </p>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
@@ -295,7 +296,7 @@
         <div class="cardBody">
           <textarea id="lista" placeholder="Cole sua lista aqui..."></textarea>
           <div class="mini">
-            Dica: <b>ONTEM</b> conta como <b>0</b>. Se você escolher +3, por exemplo, ONTEM vira <span class="kbd">03 DIAS</span> no próximo cálculo.
+            Dica: <b>ONTEM</b> conta como <b>0</b>. Se você escolher +3, ONTEM vira <span class="kbd">03 DIAS</span>.
           </div>
         </div>
       </section>
@@ -427,23 +428,28 @@
         for(const line of lines){
           const parsed = parseLine(line);
           if(!parsed){ badLines.push(line); continue; }
-          if(Number.isNaN(parsed.days)){ badDays.push(`\"${line}\" (parte final: \"${parsed.raw || ''}\")`); continue; }
+          if(Number.isNaN(parsed.days)){ badDays.push(`"${line}" (parte final: "${parsed.raw || ''}")`); continue; }
           items.push(parsed);
         }
 
         const byCode = new Map();
         for(const it of items) byCode.set(it.code, it);
 
+        // Soma +inc em todos
         for(const it of items) it.days = it.days + inc;
 
+        // Regra pedida:
+        // - Se inc=1: selecionados viram ONTEM (0)
+        // - Se inc>1: selecionados ficam com inc dias (ex: 03 DIAS), não ONTEM
         const winnersSet = new Set(winnersCodesInOrder);
         const missing = [];
         for(const code of winnersSet){
           const it = byCode.get(code);
           if(!it){ missing.push(code); continue; }
-          it.days = 0;
+          it.days = (inc === 1) ? 0 : inc;
         }
 
+        // Ordenação: dias desc; ONTEM no final
         const nonZero = items.filter(it => it.days > 0);
         const zeros = items.filter(it => it.days === 0);
 
@@ -467,6 +473,7 @@
         el.style.display = text ? "block" : "none";
       }
 
+      // ===== Seleção via botões =====
       const selected = new Set();
 
       function renderButtons(){
@@ -532,7 +539,12 @@
         setMsg($("msgWarn"), warns.join("\n\n"));
 
         const ok = [];
-        ok.push(`Atualizado: +${inc} dia(s) em todos; selecionados de hoje viraram ONTEM.`);
+        if(inc === 1){
+          ok.push("Atualizado: +1 dia em todos; selecionados de hoje viraram ONTEM.");
+        }else{
+          const incTxt = String(inc).padStart(2,"0");
+          ok.push(`Atualizado: +${inc} dias em todos; selecionados de hoje ficaram com ${incTxt} DIAS.`);
+        }
         if(res.winners.length) ok.push("Selecionados (hoje): " + res.winners.join(", "));
         setMsg($("msgOk"), ok.join("\n"));
       });
@@ -562,6 +574,7 @@
         clearSelection();
       });
 
+      // ===== PWA status + service worker =====
       async function initPWA(){
         const pill = $("pwaStatus");
         try{
@@ -577,7 +590,7 @@
       }
       initPWA();
 
-      // Botão Instalar (Android/Chrome/Edge)
+      // ===== Botão Instalar (Android/Chrome/Edge) =====
       let deferredPrompt = null;
 
       window.addEventListener("beforeinstallprompt", (e) => {

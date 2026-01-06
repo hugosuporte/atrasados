@@ -1,8 +1,8 @@
-Contador de Bichos (PWA) - v2
+Contador de Bichos (PWA) - v3
 
-Novidades:
-- Botão "Instalar app" (aparece quando o navegador permite)
-- Seletor para somar dias: +1, +3, +4, +7
+Mudança:
+- Quando Somar = +3/+4/+7, os selecionados NÃO viram "ONTEM".
+  Eles ficam com a mesma quantidade de dias selecionada (ex: +3 -> "03 DIAS").
 
-Se o app não atualizar no celular:
-- Troque CACHE em sw.js para contador-bichos-v3 e faça novo upload.
+Obs:
+- Cache atualizado para contador-bichos-v3 em sw.js
