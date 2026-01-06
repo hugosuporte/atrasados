@@ -486,7 +486,6 @@
           items.push(parsed);
         }
 
-        // índices por código e por nome (pra funcionar mesmo se colou sem número)
         const byCode = new Map();
         const byName = new Map();
         for(const it of items){
@@ -496,7 +495,7 @@
 
         const winnersSet = new Set(winnersCodesInOrder);
 
-        // Itens selecionados (objetos) para a regra especial do +1
+        // Identifica itens selecionados
         const selectedItems = new Set();
         for(const code of winnersSet){
           let it = byCode.get(code);
@@ -507,21 +506,21 @@
           if(it) selectedItems.add(it);
         }
 
-        // Soma +inc em todos
-        // Regra especial pedida:
-        // - Se inc = 1 e a linha estava "ONTEM" (0) e NÃO foi selecionada -> vira "02 DIAS"
-        // - Caso contrário, soma normalmente
+        // REGRA CORRETA
         for(const it of items){
-          if(inc === 1 && it.wasOntem && !selectedItems.has(it)){
-            it.days = 2;
+          if(inc === 1){
+            if(selectedItems.has(it)){
+              it.days = 0; // selecionados = ONTEM
+            }else if(it.wasOntem){
+              it.days = 2; // ontem vira 02 dias
+            }else{
+              it.days = it.days + 1;
+            }
           }else{
             it.days = it.days + inc;
           }
         }
 
-        // Regra dos selecionados:
-        // - inc=1: selecionados viram ONTEM (0)
-        // - inc>1: selecionados ficam com inc dias
         const missing = [];
         for(const code of winnersSet){
           let it = byCode.get(code);
@@ -529,23 +528,20 @@
             const b = BICHOS.find(x => x.code === code);
             if(b) it = byName.get(normName(b.name));
           }
-          if(!it){ missing.push(code); continue; }
-          it.days = (inc === 1) ? 0 : inc;
-          // data é mantida sem alteração
+          if(!it) missing.push(code);
         }
 
-        // Ordenação: dias desc; zeros no final
         const nonZero = items.filter(it => it.days > 0);
         const zeros = items.filter(it => it.days === 0);
 
-        const sortedNonZero = stableSort(nonZero, it => it.days, true);
+        const sortedNonZero = nonZero.sort((a,b)=>b.days-a.days);
 
-        // mantém ordem dos selecionados apenas quando ficam em zero (inc=1)
         const order = new Map(winnersCodesInOrder.map((c,idx)=>[c,idx]));
-        const sortedZeros = zeros
-          .map((it, i)=>({it, i, k: (it.code && order.has(it.code)) ? order.get(it.code) : 9999 + i}))
-          .sort((a,b)=>a.k - b.k)
-          .map(x=>x.it);
+        const sortedZeros = zeros.sort((a,b)=>{
+          const ka = a.code && order.has(a.code) ? order.get(a.code) : 9999;
+          const kb = b.code && order.has(b.code) ? order.get(b.code) : 9999;
+          return ka-kb;
+        });
 
         const out = [...sortedNonZero, ...sortedZeros].map(it => {
           const datePart = it.date ? ` – ${it.date}` : "";
@@ -553,8 +549,7 @@
             return `${it.name} ${formatDaysB(it.days)}${datePart}`;
           }
           return `${it.code || ""}${it.code ? " " : ""}${it.name} - ${formatDaysA(it.days)}${datePart}`.trim();
-        }).join("
-");
+        }).join("\n");
 
         return { out, badLines, badDays, missing, winners: [...winnersSet] };
       }
