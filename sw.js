@@ -1,51 +1,35 @@
-const CACHE = "contador-bichos-v9";
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./manifest.webmanifest",
-  "./icon-192.png",
-  "./icon-512.png"
-];
+const CACHE = "contador-bichos-v10";
+const ASSETS = ["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
+self.addEventListener("install", (e) => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
   self.skipWaiting();
 });
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.map((k) => (k !== CACHE ? caches.delete(k) : null)))
-    )
-  );
+self.addEventListener("activate", (e) => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => k!==CACHE ? caches.delete(k):null))));
   self.clients.claim();
 });
 
-self.addEventListener("fetch", (event) => {
-  const req = event.request;
-
-  // Para atualizar mais fácil: navegação e index.html vão primeiro na rede
+self.addEventListener("fetch", (e) => {
+  const req = e.request;
+  const url = new URL(req.url);
   const isNav = req.mode === "navigate";
-  const isIndex = new URL(req.url).pathname.endsWith("/index.html");
-
+  const isIndex = url.pathname.endsWith("/index.html") || url.pathname.endsWith("/");
   if (isNav || isIndex) {
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((cache) => cache.put(req, copy));
-          return res;
-        })
-        .catch(() => caches.match(req).then((c) => c || caches.match("./index.html")))
+    e.respondWith(
+      fetch(req).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(req, copy));
+        return res;
+      }).catch(() => caches.match(req).then(c => c || caches.match("./index.html")))
     );
     return;
   }
-
-  // Demais arquivos: cache-first
-  event.respondWith(
-    caches.match(req).then((cached) => cached || fetch(req).then((res) => {
+  e.respondWith(
+    caches.match(req).then(cached => cached || fetch(req).then(res => {
       const copy = res.clone();
-      caches.open(CACHE).then((cache) => cache.put(req, copy));
+      caches.open(CACHE).then(c => c.put(req, copy));
       return res;
     }))
   );

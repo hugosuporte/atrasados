@@ -8,278 +8,77 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="apple-touch-icon" href="./icon-192.png" />
-
   <title>Contador de Bichos</title>
-
   <style>
     :root{
-      --bg:#f5f8ff;
-      --card:#ffffff;
-      --text:#0f172a;
-      --muted:#51627a;
-      --line:#e6edf7;
-
-      --accent:#3b82f6;
-      --accent-2:#2563eb;
-      --accent-soft:#eaf2ff;
-
-      --danger:#b42318;
-      --ok:#067647;
-
-      --shadow: 0 10px 26px rgba(15, 23, 42, .10);
+      --bg:#f5f8ff; --card:#fff; --text:#0f172a; --muted:#51627a; --line:#e6edf7;
+      --accent:#3b82f6; --accent-2:#2563eb; --accent-soft:#eaf2ff;
+      --shadow:0 10px 26px rgba(15,23,42,.10);
+      --danger:#b42318; --ok:#067647;
       color-scheme: light;
     }
-
-    *{ box-sizing:border-box; }
+    *{box-sizing:border-box}
     body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       background:
         radial-gradient(1200px 700px at 20% -10%, rgba(59,130,246,.10), transparent 55%),
         radial-gradient(900px 500px at 90% 0%, rgba(37,99,235,.08), transparent 50%),
         var(--bg);
       color:var(--text);
     }
+    .wrap{max-width:980px;margin:0 auto;padding:16px 16px 26px}
+    header{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+    h1{margin:0;font-size:18px;letter-spacing:.2px;line-height:1.1}
+    @media (min-width:960px){h1{font-size:20px}}
+    .subtitle{margin:6px 0 0;font-size:13px;color:var(--muted);line-height:1.35;max-width:90ch}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.85);font-size:12px;color:var(--muted);user-select:none;box-shadow:0 6px 18px rgba(15,23,42,.06)}
+    .installBtn{border:1px solid rgba(59,130,246,.30);background:#fff;color:var(--accent-2);border-radius:999px;padding:10px 12px;font-weight:900;font-size:13px;min-height:40px;cursor:pointer;box-shadow:0 6px 14px rgba(15,23,42,.06);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    .grid{display:grid;gap:12px;grid-template-columns:1fr}
+    @media (min-width:960px){.grid{grid-template-columns:1fr 1fr}}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+    .cardHead{padding:12px 12px 10px;border-bottom:1px solid var(--line);background:linear-gradient(180deg, rgba(59,130,246,.08), transparent)}
+    .cardTitle{margin:0;font-size:14px;font-weight:900;letter-spacing:.2px}
+    .hint{margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.3}
+    .cardBody{padding:12px}
+    textarea{width:100%;border-radius:14px;border:1px solid var(--line);background:#fbfdff;color:var(--text);outline:none;padding:12px;font-size:13px;line-height:1.35;min-height:240px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;caret-color:var(--accent)}
+    textarea:focus{border-color:rgba(59,130,246,.65);box-shadow:0 0 0 4px rgba(59,130,246,.16);background:#fff}
+    button{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:14px;padding:12px 14px;font-weight:900;font-size:14px;cursor:pointer;min-height:46px;box-shadow:0 6px 14px rgba(15,23,42,.06)}
+    button.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 10px 20px rgba(59,130,246,.22)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .msg{margin-top:10px;font-size:12px;line-height:1.35;white-space:pre-wrap;border-radius:12px;padding:10px 12px;border:1px solid var(--line);background:#fff;display:none;box-shadow:0 6px 14px rgba(15,23,42,.06)}
+    .msg.warn{display:block;color:var(--danger);border-color:rgba(180,35,24,.25);background:rgba(180,35,24,.06)}
+    .msg.ok{display:block;color:var(--ok);border-color:rgba(6,118,71,.22);background:rgba(6,118,71,.06)}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--line);background:#fff;padding:2px 7px;border-radius:999px;font-size:12px;color:var(--text)}
+    footer{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.35;opacity:.95}
 
-    .wrap{ max-width: 980px; margin: 0 auto; padding: 16px; padding-bottom: 26px; }
-
-    header{
-      display:flex; gap:12px; align-items:flex-start; justify-content: space-between;
-      flex-wrap: wrap; margin-bottom: 12px;
-    }
-    .title{ display:flex; flex-direction: column; gap:6px; min-width: 240px; }
-    h1{ margin:0; font-size: 18px; letter-spacing: .2px; line-height: 1.1; }
-    .subtitle{ margin:0; font-size: 13px; color: var(--muted); line-height: 1.35; max-width: 76ch; }
-
-    .pill{
-      display:inline-flex; align-items:center; gap:8px; padding: 8px 10px;
-      border:1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.85);
-      font-size: 12px; color: var(--muted); user-select:none;
-      box-shadow: 0 6px 18px rgba(15,23,42,.06);
-    }
-
-    .installBtn{
-      border: 1px solid rgba(59,130,246,.30);
-      background: #ffffff;
-      color: var(--accent-2);
-      border-radius: 999px;
-      padding: 10px 12px;
-      font-weight: 900;
-      font-size: 13px;
-      min-height: 40px;
-      cursor:pointer;
-      box-shadow: 0 6px 14px rgba(15,23,42,.06);
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-    .installBtn:hover{ border-color: rgba(59,130,246,.55); }
-    .installBtn:active{ transform: translateY(1px); }
-
-    .grid{ display:grid; gap: 12px; grid-template-columns: 1fr; }
-    @media (min-width: 960px){ .grid{ grid-template-columns: 1fr 1fr; } h1{ font-size: 20px; } }
-
-    .card{
-      background: var(--card); border: 1px solid var(--line); border-radius: 16px;
-      box-shadow: var(--shadow); overflow:hidden;
-    }
-    .cardHead{
-      padding: 12px 12px 10px; border-bottom: 1px solid var(--line);
-      display:flex; align-items:center; justify-content: space-between; gap:10px;
-      background: linear-gradient(180deg, rgba(59,130,246,.08), transparent);
-    }
-    .cardTitle{ margin:0; font-size: 14px; font-weight: 900; letter-spacing: .2px; }
-    .hint{ margin:0; font-size: 12px; color: var(--muted); line-height:1.3; }
-    .cardBody{ padding: 12px; }
-
-    textarea{
-      width:100%; border-radius: 14px; border: 1px solid var(--line);
-      background: #fbfdff; color: var(--text); outline: none;
-      padding: 12px; font-size: 13px; line-height: 1.35; min-height: 240px; resize: vertical;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-      caret-color: var(--accent);
-      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-      box-shadow: inset 0 1px 0 rgba(15,23,42,.04);
-    }
-    textarea:focus{
-      border-color: rgba(59,130,246,.65);
-      box-shadow: 0 0 0 4px rgba(59,130,246,.16);
-      background: #ffffff;
-    }
-
-    button{
-      border: 1px solid var(--line);
-      background: #ffffff;
-      color: var(--text);
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-weight: 900;
-      font-size: 14px;
-      cursor:pointer;
-      min-height: 46px;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      box-shadow: 0 6px 14px rgba(15,23,42,.06);
-    }
-    button.primary{
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #ffffff;
-      box-shadow: 0 10px 20px rgba(59,130,246,.22);
-    }
-    button.primary:hover{ background: var(--accent-2); border-color: var(--accent-2); }
-    button:active{ transform: translateY(1px); }
-
-    .row{ display:flex; gap:10px; flex-wrap: wrap; margin-top: 10px; }
-
-    .msg{
-      margin-top: 10px; font-size: 12px; line-height: 1.35; white-space: pre-wrap;
-      border-radius: 12px; padding: 10px 12px; border: 1px solid var(--line);
-      background: #ffffff; display:none; box-shadow: 0 6px 14px rgba(15,23,42,.06);
-    }
-    .msg.warn{ display:block; color: var(--danger); border-color: rgba(180,35,24,.25); background: rgba(180,35,24,.06); }
-    .msg.ok{ display:block; color: var(--ok); border-color: rgba(6,118,71,.22); background: rgba(6,118,71,.06); }
-
-    .mini{ font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.35; }
-    .kbd{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      border:1px solid var(--line);
-      background: #ffffff;
-      padding: 2px 7px;
-      border-radius: 999px;
-      font-size: 12px;
-      color: var(--text);
-    }
-
-    footer{ margin-top: 14px; color: var(--muted); font-size: 12px; line-height: 1.35; opacity: .95; }
-
-    .bichoTop{
-      display:flex; align-items:center; justify-content: space-between; gap:10px;
-      flex-wrap: wrap; margin-bottom: 10px;
-    }
-    .count{
-      font-size: 12px; color: var(--muted);
-      display:inline-flex; align-items:center; gap:8px;
-      padding: 7px 10px; border-radius: 999px;
-      border:1px solid var(--line); background: #ffffff;
-      user-select:none; box-shadow: 0 6px 14px rgba(15,23,42,.06);
-    }
-
-    .control{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border:1px solid var(--line);
-      background:#ffffff;
-      box-shadow: 0 6px 14px rgba(15,23,42,.06);
-      font-size: 12px;
-      color: var(--muted);
-      user-select:none;
-    }
-
-    select{
-      border:1px solid var(--line);
-      background:#ffffff;
-      color: var(--text);
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-weight: 900;
-      font-size: 12px;
-      outline:none;
-      cursor:pointer;
-    }
-    select:focus{
-      border-color: rgba(59,130,246,.65);
-      box-shadow: 0 0 0 4px rgba(59,130,246,.14);
-    }
-
-    .bichoGrid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    @media (min-width: 520px){ .bichoGrid{ grid-template-columns: repeat(4, 1fr); } }
-    @media (min-width: 900px){ .bichoGrid{ grid-template-columns: repeat(5, 1fr); } }
-
-    .bichoBtn{
-      position: relative;
-      padding: 10px 10px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: #ffffff;
-      text-align: left;
-      min-height: 58px;
-      box-shadow: 0 8px 18px rgba(15,23,42,.06);
-      transition: transform .06s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
-    }
-    .bichoBtn:hover{
-      border-color: rgba(59,130,246,.35);
-      box-shadow: 0 12px 22px rgba(15,23,42,.10);
-    }
-    .bichoBtn .code{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-weight: 1000;
-      font-size: 12px;
-      color: var(--text);
-      opacity: .95;
-    }
-    .bichoBtn .name{
-      display:block;
-      margin-top: 3px;
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 900;
-      letter-spacing: .2px;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .bichoBtn.selected{
-      background: var(--accent-soft);
-      border-color: rgba(59,130,246,.85);
-      box-shadow: 0 14px 26px rgba(59,130,246,.18);
-      transform: translateY(-1px);
-    }
-    .bichoBtn.selected .code{ color: var(--accent-2); }
-    .bichoBtn.selected .name{ color: var(--accent-2); opacity: .95; }
-
-    .bichoBtn::after{
-      content:"";
-      position:absolute;
-      top: 10px;
-      right: 10px;
-      width: 20px;
-      height: 20px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #ffffff;
-      box-shadow: 0 6px 14px rgba(15,23,42,.06);
-    }
-    .bichoBtn.selected::after{
-      content:"✓";
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight: 1000;
-      color: #ffffff;
-      border-color: rgba(59,130,246,.95);
-      background: linear-gradient(180deg, var(--accent), var(--accent-2));
-      box-shadow: 0 10px 18px rgba(59,130,246,.22);
-    }
+    .bichoTop{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .count,.control{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;user-select:none;box-shadow:0 6px 14px rgba(15,23,42,.06)}
+    select{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:999px;padding:6px 10px;font-weight:900;font-size:12px;outline:none;cursor:pointer}
+    .bichoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    @media (min-width:520px){.bichoGrid{grid-template-columns:repeat(4,1fr)}}
+    @media (min-width:900px){.bichoGrid{grid-template-columns:repeat(5,1fr)}}
+    .bichoBtn{position:relative;padding:10px;border-radius:14px;border:1px solid var(--line);background:#fff;text-align:left;min-height:58px;box-shadow:0 8px 18px rgba(15,23,42,.06)}
+    .bichoBtn .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:1000;font-size:12px;opacity:.95}
+    .bichoBtn .name{display:block;margin-top:3px;font-size:12px;color:var(--muted);font-weight:900;letter-spacing:.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .bichoBtn.selected{background:var(--accent-soft);border-color:rgba(59,130,246,.85);box-shadow:0 14px 26px rgba(59,130,246,.18);transform:translateY(-1px)}
+    .bichoBtn.selected .code,.bichoBtn.selected .name{color:var(--accent-2)}
+    .bichoBtn::after{content:"";position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:999px;border:1px solid var(--line);background:#fff}
+    .bichoBtn.selected::after{content:"✓";display:flex;align-items:center;justify-content:center;font-weight:1000;color:#fff;border-color:rgba(59,130,246,.95);background:linear-gradient(180deg,var(--accent),var(--accent-2))}
   </style>
 </head>
-
 <body>
   <div class="wrap">
     <header>
-      <div class="title">
+      <div>
         <h1>Contador de Bichos 🧮🐾</h1>
         <p class="subtitle">
-          Agora também entende linhas com <span class="kbd">DATA</span> no final, e <b>mantém a data sem alterar</b>. Regra: em <b>+1</b>, quem estava <b>ONTEM</b> vira <b>02 dias</b> (exceto os selecionados, que ficam ONTEM).
-          Ex.: <span class="kbd">Carneiro 360 dias – 09/01</span> ou <span class="kbd">04 BORBOLETA - 20 DIAS – 09/01</span>
+          Aceita linhas com data no final (<span class="kbd">DD/MM</span>) e mantém a data sem alterar.
+          Regra do <b>+1</b>: quem estava <b>ONTEM</b> vira <b>02 DIAS</b> (exceto os selecionados, que ficam ONTEM).
         </p>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <button id="btnInstall" class="installBtn" type="button" style="display:none;">Instalar app</button>
-        <div class="pill" id="appVersion">Versão v9</div>
+        <div class="pill" id="appVersion">Versão v10</div>
         <div class="pill" id="pwaStatus">📦 PWA: verificando…</div>
       </div>
     </header>
@@ -287,32 +86,22 @@
     <div class="grid">
       <section class="card">
         <div class="cardHead">
-          <div>
-            <p class="cardTitle">Lista atual</p>
-            <p class="hint">Formatos aceitos: com código (<span class="kbd">04 BORBOLETA - 20 DIAS</span>) ou só nome (<span class="kbd">Carneiro 360 dias – 09/01</span>).</p>
-          </div>
+          <p class="cardTitle">Lista atual</p>
+          <p class="hint">Ex.: <span class="kbd">04 BORBOLETA - 20 DIAS – 09/01</span> ou <span class="kbd">Carneiro 360 dias – 09/01</span></p>
         </div>
-
         <div class="cardBody">
           <textarea id="lista" placeholder="Cole sua lista aqui..."></textarea>
-          <div class="mini">
-            Dica: <b>ONTEM</b> conta como <b>0</b>. Se a linha tiver <b>data</b> no final, ela é mantida sem alteração.
-          </div>
         </div>
       </section>
 
       <section class="card">
         <div class="cardHead">
-          <div>
-            <p class="cardTitle">Bichos que saíram HOJE</p>
-            <p class="hint">Toque para marcar/desmarcar.</p>
-          </div>
+          <p class="cardTitle">Bichos que saíram HOJE</p>
+          <p class="hint">Toque para marcar/desmarcar.</p>
         </div>
-
         <div class="cardBody">
           <div class="bichoTop">
             <div class="count" id="countSel">Selecionados: 0</div>
-
             <div class="control">
               <span>Somar:</span>
               <select id="incDays" aria-label="Somar dias">
@@ -323,19 +112,18 @@
               </select>
               <span>dias</span>
             </div>
-
             <button id="btnLimparSel" type="button">Limpar seleção</button>
           </div>
 
           <div class="bichoGrid" id="bichoGrid"></div>
 
-          <div class="row" style="margin-top:12px;">
-            <button class="primary" id="btnAtualizar">Atualizar lista</button>
-            <button id="btnCopiar">Copiar resultado</button>
-            <button id="btnLimparTudo">Limpar tudo</button>
+          <div class="row">
+            <button class="primary" id="btnAtualizar" type="button">Atualizar lista</button>
+            <button id="btnCopiar" type="button">Copiar resultado</button>
+            <button id="btnLimparTudo" type="button">Limpar tudo</button>
           </div>
 
-          <div style="margin-top: 12px;">
+          <div style="margin-top:12px;">
             <p class="cardTitle" style="margin:0 0 8px;">Resultado</p>
             <textarea id="resultado" readonly placeholder="O resultado aparece aqui."></textarea>
             <div id="msgWarn" class="msg warn"></div>
@@ -350,373 +138,255 @@
     </footer>
   </div>
 
-  <script>
-    (function(){
-      const $ = (id) => document.getElementById(id);
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
 
-      const BICHOS = [
-        {code:"01", name:"AVESTRUZ"},
-        {code:"02", name:"ÁGUIA"},
-        {code:"03", name:"BURRO"},
-        {code:"04", name:"BORBOLETA"},
-        {code:"05", name:"CACHORRO"},
-        {code:"06", name:"CABRA"},
-        {code:"07", name:"CARNEIRO"},
-        {code:"08", name:"CAMELO"},
-        {code:"09", name:"COBRA"},
-        {code:"10", name:"COELHO"},
-        {code:"11", name:"CAVALO"},
-        {code:"12", name:"ELEFANTE"},
-        {code:"13", name:"GALO"},
-        {code:"14", name:"GATO"},
-        {code:"15", name:"JACARÉ"},
-        {code:"16", name:"LEÃO"},
-        {code:"17", name:"MACACO"},
-        {code:"18", name:"PORCO"},
-        {code:"19", name:"PAVÃO"},
-        {code:"20", name:"PERU"},
-        {code:"21", name:"TOURO"},
-        {code:"22", name:"TIGRE"},
-        {code:"23", name:"URSO"},
-        {code:"24", name:"VEADO"},
-        {code:"25", name:"VACA"}
-      ];
+  // DEBUG: se isso não rodar, a seleção não aparece
+  console.log("Contador de Bichos carregado: v10");
 
-      const byNameNorm = new Map(BICHOS.map(b => [normName(b.name), b]));
+  const BICHOS = [
+    {code:"01", name:"AVESTRUZ"},{code:"02", name:"ÁGUIA"},{code:"03", name:"BURRO"},{code:"04", name:"BORBOLETA"},{code:"05", name:"CACHORRO"},
+    {code:"06", name:"CABRA"},{code:"07", name:"CARNEIRO"},{code:"08", name:"CAMELO"},{code:"09", name:"COBRA"},{code:"10", name:"COELHO"},
+    {code:"11", name:"CAVALO"},{code:"12", name:"ELEFANTE"},{code:"13", name:"GALO"},{code:"14", name:"GATO"},{code:"15", name:"JACARÉ"},
+    {code:"16", name:"LEÃO"},{code:"17", name:"MACACO"},{code:"18", name:"PORCO"},{code:"19", name:"PAVÃO"},{code:"20", name:"PERU"},
+    {code:"21", name:"TOURO"},{code:"22", name:"TIGRE"},{code:"23", name:"URSO"},{code:"24", name:"VEADO"},{code:"25", name:"VACA"}
+  ];
 
-      function pad2(n){ return String(n).padStart(2,'0'); }
+  const selected = new Set();
 
-      function normName(s){
-        return (s || "")
-          .trim()
-          .toUpperCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .replace(/[^A-Z0-9\s]/g, " ")
-          .replace(/\s+/g, " ")
-          .trim();
+  function pad2(n){ return String(n).padStart(2,'0'); }
+
+  function normName(s){
+    return (s||"").trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/[^A-Z0-9\s]/g," ").replace(/\s+/g," ").trim();
+  }
+  const byNameNorm = new Map(BICHOS.map(b => [normName(b.name), b]));
+
+  function extractDateTail(line){
+    const m = line.match(/\s*([–—-])\s*(\d{1,2}\/\d{1,2})\s*$/);
+    if(!m) return { core: line, date: null };
+    return { core: line.slice(0, m.index).trim(), date: m[2] };
+  }
+
+  function parseLine(line){
+    const raw = line.trim();
+    if(!raw) return null;
+    const { core, date } = extractDateTail(raw);
+
+    const mA = core.match(/^(\d{1,2})\s+(.+?)\s*-\s*(.+?)\s*$/i);
+    if(mA){
+      const code = pad2(parseInt(mA[1],10));
+      const name = mA[2].trim().replace(/\s+/g,' ');
+      const rhs = mA[3].trim();
+      if(/^ontem$/i.test(rhs)) return { style:"A", code, name, days: 0, wasOntem:true, date };
+      const d = rhs.match(/(\d+)\s*dias?$/i);
+      if(d) return { style:"A", code, name, days: parseInt(d[1],10), wasOntem:false, date };
+      return { style:"A", code, name, days: NaN, wasOntem:false, raw: rhs, date };
+    }
+
+    const mB = core.match(/^(.+?)\s+(\d+)\s*dias?$/i);
+    if(mB){
+      const nameIn = mB[1].trim().replace(/\s+/g,' ');
+      const days = parseInt(mB[2],10);
+      const b = byNameNorm.get(normName(nameIn));
+      return { style:"B", code: b?b.code:null, name: b?b.name:nameIn, days, wasOntem:false, date };
+    }
+
+    const mB2 = core.match(/^(.+?)\s+ontem$/i);
+    if(mB2){
+      const nameIn = mB2[1].trim().replace(/\s+/g,' ');
+      const b = byNameNorm.get(normName(nameIn));
+      return { style:"B", code: b?b.code:null, name: b?b.name:nameIn, days:0, wasOntem:true, date };
+    }
+
+    return null;
+  }
+
+  function formatDaysA(days){
+    if(days === 0) return "ONTEM";
+    if(days === 1) return "01 DIA";
+    return `${pad2(days)} DIAS`;
+  }
+  function formatDaysB(days){
+    const n = Number(days)||0;
+    return `${n} dia${n===1?"":"s"}`;
+  }
+
+  function updateList(listText, winnersCodes, inc){
+    const lines = listText.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    const items=[]; const badLines=[]; const badDays=[];
+    for(const line of lines){
+      const p = parseLine(line);
+      if(!p){ badLines.push(line); continue; }
+      if(Number.isNaN(p.days)){ badDays.push(`"${line}"`); continue; }
+      items.push(p);
+    }
+
+    const byCode=new Map(); const byName=new Map();
+    for(const it of items){ if(it.code) byCode.set(it.code,it); byName.set(normName(it.name), it); }
+
+    const winnersSet = new Set(winnersCodes);
+    const selectedItems = new Set();
+    for(const code of winnersSet){
+      let it = byCode.get(code);
+      if(!it){ const b = BICHOS.find(x=>x.code===code); if(b) it = byName.get(normName(b.name)); }
+      if(it) selectedItems.add(it);
+    }
+
+    for(const it of items){
+      if(inc === 1){
+        if(selectedItems.has(it)) it.days = 0;
+        else if(it.wasOntem) it.days = 2;
+        else it.days = it.days + 1;
+      }else{
+        it.days = it.days + inc;
+        if(selectedItems.has(it)) it.days = inc;
       }
+    }
 
-      function extractDateTail(line){
-        // aceita: " – 09/01" ou " - 09/01" no FINAL
-        const m = line.match(/\s*([–—-])\s*(\d{1,2}\/\d{1,2})\s*$/);
-        if(!m) return { core: line, date: null };
-        const date = m[2];                 // mantém exatamente "DD/MM" como veio
-        const core = line.slice(0, m.index).trim();
-        return { core, date };
-      }
+    const missing=[];
+    for(const code of winnersSet){
+      let it = byCode.get(code);
+      if(!it){ const b = BICHOS.find(x=>x.code===code); if(b) it = byName.get(normName(b.name)); }
+      if(!it) missing.push(code);
+    }
 
-      function parseLine(line){
-        const raw = line.trim();
-        if(!raw) return null;
+    const nonZero = items.filter(it=>it.days>0).sort((a,b)=>b.days-a.days);
+    const zeros = items.filter(it=>it.days===0);
 
-        const { core, date } = extractDateTail(raw);
+    const order = new Map(winnersCodes.map((c,i)=>[c,i]));
+    zeros.sort((a,b)=>{
+      const ka = a.code && order.has(a.code) ? order.get(a.code) : 9999;
+      const kb = b.code && order.has(b.code) ? order.get(b.code) : 9999;
+      return ka-kb;
+    });
 
-        // FORMATO A: "04 BORBOLETA - 20 DIAS" (com ou sem data já removida)
-        const mA = core.match(/^(\d{1,2})\s+(.+?)\s*-\s*(.+?)\s*$/i);
-        if(mA){
-          const code = pad2(parseInt(mA[1],10));
-          const name = mA[2].trim().replace(/\s+/g,' ');
-          const rhs = mA[3].trim();
+    const out = [...nonZero, ...zeros].map(it=>{
+      const datePart = it.date ? ` – ${it.date}` : "";
+      if(it.style === "B") return `${it.name} ${formatDaysB(it.days)}${datePart}`;
+      return `${it.code} ${it.name} - ${formatDaysA(it.days)}${datePart}`;
+    }).join("\n");
 
-          if(/^ontem$/i.test(rhs)) return { style:\"A\", code, name, days: 0, wasOntem: true, date };
-          const d = rhs.match(/(\d+)\s*dias?$/i);
-          if(d) return { style:"A", code, name, days: parseInt(d[1],10), date };
-          const d2 = rhs.match(/^(\d+)$/);
-          if(d2) return { style:"A", code, name, days: parseInt(d2[1],10), date };
+    return { out, badLines, badDays, missing };
+  }
 
-          return { style:"A", code, name, days: NaN, raw: rhs, date };
-        }
-
-        // FORMATO B: "Carneiro 360 dias" (com data já removida)
-        const mB = core.match(/^(.+?)\s+(\d+)\s*dias?$/i);
-        if(mB){
-          const nameIn = mB[1].trim().replace(/\s+/g,' ');
-          const days = parseInt(mB[2],10);
-          const b = byNameNorm.get(normName(nameIn));
-          const code = b ? b.code : null;
-          const name = b ? b.name : nameIn;  // usa nome padronizado se reconheceu
-          return { style:"B", code, name, days, date };
-        }
-
-        // FORMATO B2: "Carneiro ONTEM" (se alguém usar)
-        const mB2 = core.match(/^(.+?)\s+ontem$/i);
-        if(mB2){
-          const nameIn = mB2[1].trim().replace(/\s+/g,' ');
-          const b = byNameNorm.get(normName(nameIn));
-          const code = b ? b.code : null;
-          const name = b ? b.name : nameIn;
-          return { style:\"B\", code, name, days: 0, wasOntem: true, date };
-        }
-
-        return null;
-      }
-
-      function formatDaysA(days){
-        if(days === 0) return "ONTEM";
-        if(days === 1) return "01 DIA";
-        return `${pad2(days)} DIAS`;
-      }
-
-      function formatDaysB(days){
-        const n = Number(days) || 0;
-        return `${n} dia${n === 1 ? "" : "s"}`; // 1 dia / 2 dias / 0 dias
-      }
-
-      function stableSort(arr, keyFn, desc=true){
-        return arr
-          .map((v,i)=>({v,i,k:keyFn(v)}))
-          .sort((a,b)=>{
-            if(a.k === b.k) return a.i - b.i;
-            return desc ? (b.k - a.k) : (a.k - b.k);
-          })
-          .map(x=>x.v);
-      }
-
-      function updateList(listText, winnersCodesInOrder, inc){
-        const lines = listText.split(/?
-/).map(l => l.trim()).filter(Boolean);
-        const items = [];
-        const badLines = [];
-        const badDays = [];
-
-        for(const line of lines){
-          const parsed = parseLine(line);
-          if(!parsed){ badLines.push(line); continue; }
-          if(Number.isNaN(parsed.days)){ badDays.push(`"${line}" (parte final: "${parsed.raw || ''}")`); continue; }
-          items.push(parsed);
-        }
-
-        const byCode = new Map();
-        const byName = new Map();
-        for(const it of items){
-          if(it.code) byCode.set(it.code, it);
-          byName.set(normName(it.name), it);
-        }
-
-        const winnersSet = new Set(winnersCodesInOrder);
-
-        // Identifica itens selecionados
-        const selectedItems = new Set();
-        for(const code of winnersSet){
-          let it = byCode.get(code);
-          if(!it){
-            const b = BICHOS.find(x => x.code === code);
-            if(b) it = byName.get(normName(b.name));
-          }
-          if(it) selectedItems.add(it);
-        }
-
-        // REGRA CORRETA
-        for(const it of items){
-          if(inc === 1){
-            if(selectedItems.has(it)){
-              it.days = 0; // selecionados = ONTEM
-            }else if(it.wasOntem){
-              it.days = 2; // ontem vira 02 dias
-            }else{
-              it.days = it.days + 1;
-            }
-          }else{
-            it.days = it.days + inc;
-          }
-        }
-
-        const missing = [];
-        for(const code of winnersSet){
-          let it = byCode.get(code);
-          if(!it){
-            const b = BICHOS.find(x => x.code === code);
-            if(b) it = byName.get(normName(b.name));
-          }
-          if(!it) missing.push(code);
-        }
-
-        const nonZero = items.filter(it => it.days > 0);
-        const zeros = items.filter(it => it.days === 0);
-
-        const sortedNonZero = nonZero.sort((a,b)=>b.days-a.days);
-
-        const order = new Map(winnersCodesInOrder.map((c,idx)=>[c,idx]));
-        const sortedZeros = zeros.sort((a,b)=>{
-          const ka = a.code && order.has(a.code) ? order.get(a.code) : 9999;
-          const kb = b.code && order.has(b.code) ? order.get(b.code) : 9999;
-          return ka-kb;
-        });
-
-        const out = [...sortedNonZero, ...sortedZeros].map(it => {
-          const datePart = it.date ? ` – ${it.date}` : "";
-          if(it.style === "B"){
-            return `${it.name} ${formatDaysB(it.days)}${datePart}`;
-          }
-          return `${it.code || ""}${it.code ? " " : ""}${it.name} - ${formatDaysA(it.days)}${datePart}`.trim();
-        }).join("\n");
-
-        return { out, badLines, badDays, missing, winners: [...winnersSet] };
-      }
-
-      function setMsg(el, text){
-        el.textContent = text || "";
-        el.style.display = text ? "block" : "none";
-      }
-
-      // ===== Seleção via botões =====
-      const selected = new Set();
-
-      function renderButtons(){
-        const grid = $("bichoGrid");
-        grid.innerHTML = "";
-        for(const b of BICHOS){
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "bichoBtn";
-          btn.dataset.code = b.code;
-          btn.innerHTML = `<span class="code">${b.code}</span><span class="name">${b.name}</span>`;
-
-          btn.addEventListener("click", () => {
-            const code = b.code;
-            if(selected.has(code)){
-              selected.delete(code);
-              btn.classList.remove("selected");
-            }else{
-              selected.add(code);
-              btn.classList.add("selected");
-            }
-            updateCount();
-          });
-
-          grid.appendChild(btn);
-        }
-      }
-
-      function updateCount(){
+  function renderButtons(){
+    const grid = $("bichoGrid");
+    if(!grid){
+      alert("ERRO: não achei o bloco de seleção (bichoGrid). Atualize o app e limpe o cache.");
+      return;
+    }
+    grid.innerHTML = "";
+    for(const b of BICHOS){
+      const btn = document.createElement("button");
+      btn.type="button";
+      btn.className="bichoBtn";
+      btn.dataset.code=b.code;
+      btn.innerHTML = `<span class="code">${b.code}</span><span class="name">${b.name}</span>`;
+      btn.addEventListener("click", ()=>{
+        if(selected.has(b.code)){ selected.delete(b.code); btn.classList.remove("selected"); }
+        else { selected.add(b.code); btn.classList.add("selected"); }
         $("countSel").textContent = `Selecionados: ${selected.size}`;
-      }
-
-      function clearSelection(){
-        selected.clear();
-        document.querySelectorAll(".bichoBtn.selected").forEach(el => el.classList.remove("selected"));
-        updateCount();
-      }
-
-      renderButtons();
-      updateCount();
-
-      $("btnLimparSel").addEventListener("click", clearSelection);
-
-      $("btnAtualizar").addEventListener("click", () => {
-        const lista = $("lista").value || "";
-        const winners = Array.from(selected).sort((a,b)=>parseInt(a,10)-parseInt(b,10));
-        const inc = parseInt($("incDays").value, 10) || 1;
-
-        const res = updateList(lista, winners, inc);
-
-        $("resultado").value = res.out;
-
-        const warns = [];
-        if(res.badLines.length){
-          warns.push("Linhas que não reconheci (verifique o formato):\n- " + res.badLines.join("\n- "));
-        }
-        if(res.badDays.length){
-          warns.push("Linhas com contagem inválida:\n- " + res.badDays.join("\n- "));
-        }
-        if(res.missing.length){
-          warns.push("Atenção: alguns selecionados não estavam na lista colada:\n- " + res.missing.join(", "));
-        }
-        setMsg($("msgWarn"), warns.join("\n\n"));
-
-        const ok = [];
-        if(inc === 1){
-          ok.push("Atualizado: +1 dia em todos; selecionados de hoje ficaram em 0 (ONTEM no estilo com código).");
-        }else{
-          const incTxt = String(inc).padStart(2,"0");
-          ok.push(`Atualizado: +${inc} dias em todos; selecionados de hoje ficaram com ${incTxt} DIAS.`);
-        }
-        ok.push("Datas no final (DD/MM) foram mantidas sem alteração.");
-        if(res.winners.length) ok.push("Selecionados (hoje): " + res.winners.join(", "));
-        setMsg($("msgOk"), ok.join("\n"));
       });
+      grid.appendChild(btn);
+    }
+  }
 
-      $("btnCopiar").addEventListener("click", async () => {
-        const text = $("resultado").value || "";
-        if(!text.trim()) return;
+  function clearSelection(){
+    selected.clear();
+    document.querySelectorAll(".bichoBtn.selected").forEach(el=>el.classList.remove("selected"));
+    $("countSel").textContent = "Selecionados: 0";
+  }
 
-        try{
-          await navigator.clipboard.writeText(text);
-          setMsg($("msgOk"), "Copiado para a área de transferência ✅");
-          setTimeout(()=>setMsg($("msgOk"), ""), 1400);
-        }catch(e){
-          $("resultado").focus();
-          $("resultado").select();
-          document.execCommand("copy");
-          setMsg($("msgOk"), "Copiado (modo compatibilidade) ✅");
-          setTimeout(()=>setMsg($("msgOk"), ""), 1400);
-        }
-      });
+  renderButtons();
 
-      $("btnLimparTudo").addEventListener("click", () => {
-        $("lista").value = "";
-        $("resultado").value = "";
-        setMsg($("msgWarn"), "");
-        setMsg($("msgOk"), "");
-        clearSelection();
-      });
+  $("btnLimparSel").addEventListener("click", clearSelection);
 
-      // ===== PWA status + service worker =====
-      async function initPWA(){
-        const pill = $("pwaStatus");
-        try{
-          if(!("serviceWorker" in navigator)){
-            pill.textContent = "📦 PWA: sem suporte";
-            return;
-          }
-          const reg = await navigator.serviceWorker.register("./sw.js");
-          pill.textContent = reg.active ? "📦 PWA: pronto (cache ativo)" : "📦 PWA: pronto";
-        }catch(err){
-          pill.textContent = "📦 PWA: erro no registro";
-        }
-      }
-      initPWA();
+  function setWarn(text){
+    const el = $("msgWarn");
+    if(!text){ el.style.display="none"; el.textContent=""; return; }
+    el.style.display="block"; el.textContent=text; el.classList.add("warn");
+  }
+  function setOk(text){
+    const el = $("msgOk");
+    if(!text){ el.style.display="none"; el.textContent=""; return; }
+    el.style.display="block"; el.textContent=text; el.classList.add("ok");
+  }
 
-      // ===== Botão Instalar (Android/Chrome/Edge) =====
-      let deferredPrompt = null;
+  $("btnAtualizar").addEventListener("click", ()=>{
+    const lista = $("lista").value || "";
+    const winners = Array.from(selected).sort((a,b)=>parseInt(a,10)-parseInt(b,10));
+    const inc = parseInt($("incDays").value,10) || 1;
 
-      window.addEventListener("beforeinstallprompt", (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        const btn = $("btnInstall");
-        if(btn) btn.style.display = "inline-flex";
-        const pill = $("pwaStatus");
-        if(pill) pill.textContent = "📦 PWA: pronto para instalar";
-      });
+    const res = updateList(lista, winners, inc);
+    $("resultado").value = res.out;
 
-      $("btnInstall")?.addEventListener("click", async () => {
-        if(deferredPrompt){
-          deferredPrompt.prompt();
-          const choice = await deferredPrompt.userChoice;
-          deferredPrompt = null;
+    const warns=[];
+    if(res.badLines.length) warns.push("Linhas não reconhecidas:\n- " + res.badLines.join("\n- "));
+    if(res.badDays.length) warns.push("Linhas com contagem inválida:\n- " + res.badDays.join("\n- "));
+    if(res.missing.length) warns.push("Selecionados não encontrados na lista colada:\n- " + res.missing.join(", "));
+    setWarn(warns.join("\n\n"));
 
-          const btn = $("btnInstall");
-          if(btn) btn.style.display = "none";
+    const ok=[];
+    if(inc===1) ok.push("Somar +1: ONTEM (não selecionado) → 02 DIAS; selecionados → ONTEM.");
+    else ok.push(`Somar +${inc}: selecionados → ${String(inc).padStart(2,"0")} DIAS.`);
+    ok.push("Datas DD/MM mantidas.");
+    setOk(ok.join("\n"));
+  });
 
-          const pill = $("pwaStatus");
-          if(pill){
-            pill.textContent = choice?.outcome === "accepted"
-              ? "📦 PWA: instalado ✅"
-              : "📦 PWA: instalação cancelada";
-          }
-          return;
-        }
-        alert("No iPhone: abra no Safari → Compartilhar → Adicionar à Tela de Início.");
-      });
+  $("btnCopiar").addEventListener("click", async ()=>{
+    const text = $("resultado").value || "";
+    if(!text.trim()) return;
+    try{
+      await navigator.clipboard.writeText(text);
+      setOk("Copiado ✅");
+      setTimeout(()=>setOk(""), 1200);
+    }catch(e){
+      $("resultado").focus(); $("resultado").select();
+      document.execCommand("copy");
+      setOk("Copiado (compatibilidade) ✅");
+      setTimeout(()=>setOk(""), 1200);
+    }
+  });
 
-      window.addEventListener("appinstalled", () => {
-        const btn = $("btnInstall");
-        if(btn) btn.style.display = "none";
-        const pill = $("pwaStatus");
-        if(pill) pill.textContent = "📦 PWA: instalado ✅";
-      });
-    })();
-  </script>
+  $("btnLimparTudo").addEventListener("click", ()=>{
+    $("lista").value=""; $("resultado").value="";
+    setWarn(""); setOk("");
+    clearSelection();
+  });
+
+  // PWA
+  (async function initPWA(){
+    const pill = $("pwaStatus");
+    try{
+      if(!("serviceWorker" in navigator)){ pill.textContent="📦 PWA: sem suporte"; return; }
+      const reg = await navigator.serviceWorker.register("./sw.js");
+      pill.textContent = reg.active ? "📦 PWA: pronto (cache ativo)" : "📦 PWA: pronto";
+    }catch(e){
+      pill.textContent="📦 PWA: erro no registro";
+    }
+  })();
+
+  // Instalar
+  let deferredPrompt=null;
+  window.addEventListener("beforeinstallprompt", (e)=>{
+    e.preventDefault(); deferredPrompt=e;
+    $("btnInstall").style.display="inline-flex";
+    $("pwaStatus").textContent="📦 PWA: pronto para instalar";
+  });
+  $("btnInstall").addEventListener("click", async ()=>{
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt=null;
+      $("btnInstall").style.display="none";
+      $("pwaStatus").textContent="📦 PWA: instalado/ok";
+      return;
+    }
+    alert("No iPhone: Safari → Compartilhar → Adicionar à Tela de Início.");
+  });
+})();
+</script>
 </body>
 </html>
