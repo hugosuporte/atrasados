@@ -273,7 +273,7 @@
       <div class="title">
         <h1>Contador de Bichos 🧮🐾</h1>
         <p class="subtitle">
-          Agora também entende linhas com <span class="kbd">DATA</span> no final, e <b>mantém a data sem alterar</b>.
+          Agora também entende linhas com <span class="kbd">DATA</span> no final, e <b>mantém a data sem alterar</b>. Regra: em <b>+1</b>, quem estava <b>ONTEM</b> vira <b>02 dias</b> (exceto os selecionados, que ficam ONTEM).
           Ex.: <span class="kbd">Carneiro 360 dias – 09/01</span> ou <span class="kbd">04 BORBOLETA - 20 DIAS – 09/01</span>
         </p>
       </div>
@@ -418,7 +418,7 @@
           const name = mA[2].trim().replace(/\s+/g,' ');
           const rhs = mA[3].trim();
 
-          if(/^ontem$/i.test(rhs)) return { style:"A", code, name, days: 0, date };
+          if(/^ontem$/i.test(rhs)) return { style:\"A\", code, name, days: 0, wasOntem: true, date };
           const d = rhs.match(/(\d+)\s*dias?$/i);
           if(d) return { style:"A", code, name, days: parseInt(d[1],10), date };
           const d2 = rhs.match(/^(\d+)$/);
@@ -445,7 +445,7 @@
           const b = byNameNorm.get(normName(nameIn));
           const code = b ? b.code : null;
           const name = b ? b.name : nameIn;
-          return { style:"B", code, name, days: 0, date };
+          return { style:\"B\", code, name, days: 0, wasOntem: true, date };
         }
 
         return null;
@@ -473,7 +473,8 @@
       }
 
       function updateList(listText, winnersCodesInOrder, inc){
-        const lines = listText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        const lines = listText.split(/?
+/).map(l => l.trim()).filter(Boolean);
         const items = [];
         const badLines = [];
         const badDays = [];
@@ -493,24 +494,44 @@
           byName.set(normName(it.name), it);
         }
 
+        const winnersSet = new Set(winnersCodesInOrder);
+
+        // Itens selecionados (objetos) para a regra especial do +1
+        const selectedItems = new Set();
+        for(const code of winnersSet){
+          let it = byCode.get(code);
+          if(!it){
+            const b = BICHOS.find(x => x.code === code);
+            if(b) it = byName.get(normName(b.name));
+          }
+          if(it) selectedItems.add(it);
+        }
+
         // Soma +inc em todos
-        for(const it of items) it.days = it.days + inc;
+        // Regra especial pedida:
+        // - Se inc = 1 e a linha estava "ONTEM" (0) e NÃO foi selecionada -> vira "02 DIAS"
+        // - Caso contrário, soma normalmente
+        for(const it of items){
+          if(inc === 1 && it.wasOntem && !selectedItems.has(it)){
+            it.days = 2;
+          }else{
+            it.days = it.days + inc;
+          }
+        }
 
         // Regra dos selecionados:
-        // - inc=1: selecionados viram 0
-        // - inc>1: selecionados viram inc
-        const winnersSet = new Set(winnersCodesInOrder);
+        // - inc=1: selecionados viram ONTEM (0)
+        // - inc>1: selecionados ficam com inc dias
         const missing = [];
         for(const code of winnersSet){
           let it = byCode.get(code);
           if(!it){
-            // tenta achar pelo nome do botão (caso a lista tenha vindo sem código)
             const b = BICHOS.find(x => x.code === code);
             if(b) it = byName.get(normName(b.name));
           }
           if(!it){ missing.push(code); continue; }
           it.days = (inc === 1) ? 0 : inc;
-          // IMPORTANTE: data é mantida SEM ALTERAR (não mexemos em it.date)
+          // data é mantida sem alteração
         }
 
         // Ordenação: dias desc; zeros no final
@@ -519,7 +540,7 @@
 
         const sortedNonZero = stableSort(nonZero, it => it.days, true);
 
-        // mantém ordem de selecionados apenas quando ficam em zero (inc=1)
+        // mantém ordem dos selecionados apenas quando ficam em zero (inc=1)
         const order = new Map(winnersCodesInOrder.map((c,idx)=>[c,idx]));
         const sortedZeros = zeros
           .map((it, i)=>({it, i, k: (it.code && order.has(it.code)) ? order.get(it.code) : 9999 + i}))
@@ -531,9 +552,9 @@
           if(it.style === "B"){
             return `${it.name} ${formatDaysB(it.days)}${datePart}`;
           }
-          // estilo A
           return `${it.code || ""}${it.code ? " " : ""}${it.name} - ${formatDaysA(it.days)}${datePart}`.trim();
-        }).join("\n");
+        }).join("
+");
 
         return { out, badLines, badDays, missing, winners: [...winnersSet] };
       }

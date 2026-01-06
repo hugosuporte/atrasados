@@ -1,9 +1,11 @@
-Contador de Bichos (PWA) - v4 (datas DD/MM)
+Contador de Bichos (PWA) - v5
 
-Mudança:
-- Aceita linhas com data no final (ex: "Carneiro 360 dias – 09/01").
-- Mantém a data no texto final sem alteração.
-- Continua aceitando o formato antigo com código ("04 BORBOLETA - 20 DIAS").
+Correção:
+- Quando Somar = +1:
+  - Linhas que estavam "ONTEM" e NÃO foram selecionadas viram "02 dias" no resultado.
+  - Os bichos selecionados (hoje) aparecem como "ONTEM" no resultado.
+- Para +3/+4/+7 permanece como antes.
+- Datas DD/MM no final continuam sendo mantidas sem alteração.
 
 Obs:
-- Cache atualizado para contador-bichos-v4 em sw.js
+- Cache atualizado para contador-bichos-v5 em sw.js
