@@ -1,15 +1,8 @@
-Contador de Bichos (PWA)
+Contador de Bichos (PWA) - v2
 
-Arquivos:
-- index.html
-- manifest.webmanifest
-- sw.js
-- icon-192.png
-- icon-512.png
+Novidades:
+- Botão "Instalar app" (aparece quando o navegador permite)
+- Seletor para somar dias: +1, +3, +4, +7
 
-Publicar (bem rápido):
-- GitHub Pages: crie repo, suba esses arquivos na raiz, Settings > Pages > Deploy main/(root)
-- Netlify: arraste a pasta com esses arquivos em 'Deploy manually'
-
-Atualização de cache:
-- se mudar arquivos e não atualizar no celular, mude CACHE em sw.js para v2, v3...
+Se o app não atualizar no celular:
+- Troque CACHE em sw.js para contador-bichos-v3 e faça novo upload.
