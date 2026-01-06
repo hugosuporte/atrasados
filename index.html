@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#3b82f6" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+
+  <title>Contador de Bichos</title>
+
+  <style>
+    :root{
+      --bg:#f5f8ff;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#51627a;
+      --line:#e6edf7;
+
+      --accent:#3b82f6;
+      --accent-2:#2563eb;
+      --accent-soft:#eaf2ff;
+
+      --danger:#b42318;
+      --ok:#067647;
+
+      --shadow: 0 10px 26px rgba(15, 23, 42, .10);
+      color-scheme: light;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(59,130,246,.10), transparent 55%),
+        radial-gradient(900px 500px at 90% 0%, rgba(37,99,235,.08), transparent 50%),
+        var(--bg);
+      color:var(--text);
+    }
+
+    .wrap{ max-width: 980px; margin: 0 auto; padding: 16px; padding-bottom: 26px; }
+
+    header{
+      display:flex; gap:12px; align-items:flex-start; justify-content: space-between;
+      flex-wrap: wrap; margin-bottom: 12px;
+    }
+    .title{ display:flex; flex-direction: column; gap:6px; min-width: 240px; }
+    h1{ margin:0; font-size: 18px; letter-spacing: .2px; line-height: 1.1; }
+    .subtitle{
+      margin:0; font-size: 13px; color: var(--muted); line-height: 1.35; max-width: 62ch;
+    }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px; padding: 8px 10px;
+      border:1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.85);
+      font-size: 12px; color: var(--muted); user-select:none;
+      box-shadow: 0 6px 18px rgba(15,23,42,.06);
+    }
+
+    .grid{ display:grid; gap: 12px; grid-template-columns: 1fr; }
+    @media (min-width: 960px){ .grid{ grid-template-columns: 1fr 1fr; } h1{ font-size: 20px; } }
+
+    .card{
+      background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+      box-shadow: var(--shadow); overflow:hidden;
+    }
+
+    .cardHead{
+      padding: 12px 12px 10px; border-bottom: 1px solid var(--line);
+      display:flex; align-items:center; justify-content: space-between; gap:10px;
+      background: linear-gradient(180deg, rgba(59,130,246,.08), transparent);
+    }
+
+    .cardTitle{ margin:0; font-size: 14px; font-weight: 900; letter-spacing: .2px; }
+    .hint{ margin:0; font-size: 12px; color: var(--muted); line-height:1.3; }
+
+    .cardBody{ padding: 12px; }
+
+    textarea{
+      width:100%; border-radius: 14px; border: 1px solid var(--line);
+      background: #fbfdff; color: var(--text); outline: none;
+      padding: 12px; font-size: 13px; line-height: 1.35; min-height: 240px; resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      caret-color: var(--accent);
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+      box-shadow: inset 0 1px 0 rgba(15,23,42,.04);
+    }
+    textarea:focus{
+      border-color: rgba(59,130,246,.65);
+      box-shadow: 0 0 0 4px rgba(59,130,246,.16);
+      background: #ffffff;
+    }
+
+    button{
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 900;
+      font-size: 14px;
+      cursor:pointer;
+      min-height: 46px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      box-shadow: 0 6px 14px rgba(15,23,42,.06);
+    }
+    button.primary{
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 10px 20px rgba(59,130,246,.22);
+    }
+    button.primary:hover{ background: var(--accent-2); border-color: var(--accent-2); }
+    button:active{ transform: translateY(1px); }
+
+    .row{ display:flex; gap:10px; flex-wrap: wrap; margin-top: 10px; }
+
+    .msg{
+      margin-top: 10px; font-size: 12px; line-height: 1.35; white-space: pre-wrap;
+      border-radius: 12px; padding: 10px 12px; border: 1px solid var(--line);
+      background: #ffffff; display:none; box-shadow: 0 6px 14px rgba(15,23,42,.06);
+    }
+    .msg.warn{ display:block; color: var(--danger); border-color: rgba(180,35,24,.25); background: rgba(180,35,24,.06); }
+    .msg.ok{ display:block; color: var(--ok); border-color: rgba(6,118,71,.22); background: rgba(6,118,71,.06); }
+
+    .mini{ font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.35; }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      border:1px solid var(--line);
+      background: #ffffff;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    footer{ margin-top: 14px; color: var(--muted); font-size: 12px; line-height: 1.35; opacity: .95; }
+
+    .bichoTop{
+      display:flex; align-items:center; justify-content: space-between; gap:10px;
+      flex-wrap: wrap; margin-bottom: 10px;
+    }
+    .count{
+      font-size: 12px; color: var(--muted);
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 7px 10px; border-radius: 999px;
+      border:1px solid var(--line); background: #ffffff;
+      user-select:none; box-shadow: 0 6px 14px rgba(15,23,42,.06);
+    }
+
+    .bichoGrid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    @media (min-width: 520px){ .bichoGrid{ grid-template-columns: repeat(4, 1fr); } }
+    @media (min-width: 900px){ .bichoGrid{ grid-template-columns: repeat(5, 1fr); } }
+
+    .bichoBtn{
+      position: relative;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      text-align: left;
+      min-height: 58px;
+      box-shadow: 0 8px 18px rgba(15,23,42,.06);
+      transition: transform .06s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .bichoBtn:hover{
+      border-color: rgba(59,130,246,.35);
+      box-shadow: 0 12px 22px rgba(15,23,42,.10);
+    }
+    .bichoBtn .code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-weight: 1000;
+      font-size: 12px;
+      color: var(--text);
+      opacity: .95;
+    }
+    .bichoBtn .name{
+      display:block;
+      margin-top: 3px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: .2px;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bichoBtn.selected{
+      background: var(--accent-soft);
+      border-color: rgba(59,130,246,.85);
+      box-shadow: 0 14px 26px rgba(59,130,246,.18);
+      transform: translateY(-1px);
+    }
+    .bichoBtn.selected .code{ color: var(--accent-2); }
+    .bichoBtn.selected .name{ color: var(--accent-2); opacity: .95; }
+
+    .bichoBtn::after{
+      content:"";
+      position:absolute;
+      top: 10px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      box-shadow: 0 6px 14px rgba(15,23,42,.06);
+    }
+    .bichoBtn.selected::after{
+      content:"✓";
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
+      color: #ffffff;
+      border-color: rgba(59,130,246,.95);
+      background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      box-shadow: 0 10px 18px rgba(59,130,246,.22);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Contador de Bichos 🧮🐾</h1>
+        <p class="subtitle">
+          Cole a lista. Depois selecione nos botões quais bichos saíram <b>hoje</b>.
+          O sistema soma <b>+1 dia</b> em todos e coloca os vencedores como <b>ONTEM</b> (no final).
+        </p>
+      </div>
+      <div class="pill" id="pwaStatus">📦 PWA: verificando…</div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <div class="cardHead">
+          <div>
+            <p class="cardTitle">Lista atual</p>
+            <p class="hint">Ex.: <span class="kbd">04 BORBOLETA - 20 DIAS</span> ou <span class="kbd">22 TIGRE - ONTEM</span></p>
+          </div>
+        </div>
+
+        <div class="cardBody">
+          <textarea id="lista" placeholder="Cole sua lista aqui..."></textarea>
+          <div class="mini">
+            Dica: <b>ONTEM</b> conta como <b>0</b>. No próximo dia vira <span class="kbd">01 DIA</span>.
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="cardHead">
+          <div>
+            <p class="cardTitle">Bichos que saíram HOJE</p>
+            <p class="hint">Toque para marcar/desmarcar. Seleção fica bem destacada.</p>
+          </div>
+        </div>
+
+        <div class="cardBody">
+          <div class="bichoTop">
+            <div class="count" id="countSel">Selecionados: 0</div>
+            <button id="btnLimparSel" type="button">Limpar seleção</button>
+          </div>
+
+          <div class="bichoGrid" id="bichoGrid"></div>
+
+          <div class="row" style="margin-top:12px;">
+            <button class="primary" id="btnAtualizar">Atualizar lista</button>
+            <button id="btnCopiar">Copiar resultado</button>
+            <button id="btnLimparTudo">Limpar tudo</button>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <p class="cardTitle" style="margin:0 0 8px;">Resultado</p>
+            <textarea id="resultado" readonly placeholder="O resultado aparece aqui."></textarea>
+            <div id="msgWarn" class="msg warn"></div>
+            <div id="msgOk" class="msg ok"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      PWA: após hospedar, abra no celular e use “Adicionar à tela inicial”. (No iPhone: Safari → Compartilhar → Adicionar à Tela de Início)
+    </footer>
+  </div>
+
+  <script>
+    (function(){
+      const $ = (id) => document.getElementById(id);
+
+      const BICHOS = [
+        {code:"01", name:"AVESTRUZ"},
+        {code:"02", name:"ÁGUIA"},
+        {code:"03", name:"BURRO"},
+        {code:"04", name:"BORBOLETA"},
+        {code:"05", name:"CACHORRO"},
+        {code:"06", name:"CABRA"},
+        {code:"07", name:"CARNEIRO"},
+        {code:"08", name:"CAMELO"},
+        {code:"09", name:"COBRA"},
+        {code:"10", name:"COELHO"},
+        {code:"11", name:"CAVALO"},
+        {code:"12", name:"ELEFANTE"},
+        {code:"13", name:"GALO"},
+        {code:"14", name:"GATO"},
+        {code:"15", name:"JACARÉ"},
+        {code:"16", name:"LEÃO"},
+        {code:"17", name:"MACACO"},
+        {code:"18", name:"PORCO"},
+        {code:"19", name:"PAVÃO"},
+        {code:"20", name:"PERU"},
+        {code:"21", name:"TOURO"},
+        {code:"22", name:"TIGRE"},
+        {code:"23", name:"URSO"},
+        {code:"24", name:"VEADO"},
+        {code:"25", name:"VACA"}
+      ];
+
+      function pad2(n){ return String(n).padStart(2,'0'); }
+
+      function parseLine(line){
+        const m = line.trim().match(/^(\d{1,2})\s+(.+?)\s*-\s*(.+?)\s*$/i);
+        if(!m) return null;
+
+        const code = pad2(parseInt(m[1],10));
+        const name = m[2].trim().replace(/\s+/g,' ');
+        const rhs = m[3].trim();
+
+        if(/^ontem$/i.test(rhs)) return { code, name, days: 0 };
+
+        const d = rhs.match(/(\d+)\s*dias?$/i);
+        if(d) return { code, name, days: parseInt(d[1],10) };
+
+        const d2 = rhs.match(/^(\d+)$/);
+        if(d2) return { code, name, days: parseInt(d2[1],10) };
+
+        return { code, name, days: NaN, raw: rhs };
+      }
+
+      function formatDays(days){
+        if(days === 0) return "ONTEM";
+        if(days === 1) return "01 DIA";
+        return `${pad2(days)} DIAS`;
+      }
+
+      function stableSort(arr, keyFn, desc=true){
+        return arr
+          .map((v,i)=>({v,i,k:keyFn(v)}))
+          .sort((a,b)=>{
+            if(a.k === b.k) return a.i - b.i;
+            return desc ? (b.k - a.k) : (a.k - b.k);
+          })
+          .map(x=>x.v);
+      }
+
+      function updateList(listText, winnersCodesInOrder){
+        const lines = listText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        const items = [];
+        const badLines = [];
+        const badDays = [];
+
+        for(const line of lines){
+          const parsed = parseLine(line);
+          if(!parsed){ badLines.push(line); continue; }
+          if(Number.isNaN(parsed.days)){ badDays.push(`"${line}" (parte final: "${parsed.raw || ''}")`); continue; }
+          items.push(parsed);
+        }
+
+        const byCode = new Map();
+        for(const it of items) byCode.set(it.code, it);
+
+        for(const it of items) it.days = it.days + 1;
+
+        const winnersSet = new Set(winnersCodesInOrder);
+        const missing = [];
+        for(const code of winnersSet){
+          const it = byCode.get(code);
+          if(!it){ missing.push(code); continue; }
+          it.days = 0;
+        }
+
+        const nonZero = items.filter(it => it.days > 0);
+        const zeros = items.filter(it => it.days === 0);
+
+        const sortedNonZero = stableSort(nonZero, it => it.days, true);
+
+        const order = new Map(winnersCodesInOrder.map((c,idx)=>[c,idx]));
+        const sortedZeros = zeros
+          .map((it, i)=>({it, i, k: order.has(it.code) ? order.get(it.code) : 9999 + i}))
+          .sort((a,b)=>a.k - b.k)
+          .map(x=>x.it);
+
+        const out = [...sortedNonZero, ...sortedZeros]
+          .map(it => `${it.code} ${it.name} - ${formatDays(it.days)}`)
+          .join("\n");
+
+        return { out, badLines, badDays, missing, winners: [...winnersSet] };
+      }
+
+      function setMsg(el, text){
+        el.textContent = text || "";
+        el.style.display = text ? "block" : "none";
+      }
+
+      const selected = new Set();
+
+      function renderButtons(){
+        const grid = $("bichoGrid");
+        grid.innerHTML = "";
+
+        for(const b of BICHOS){
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "bichoBtn";
+          btn.dataset.code = b.code;
+          btn.innerHTML = `<span class="code">${b.code}</span><span class="name">${b.name}</span>`;
+
+          btn.addEventListener("click", () => {
+            const code = b.code;
+            if(selected.has(code)){
+              selected.delete(code);
+              btn.classList.remove("selected");
+            }else{
+              selected.add(code);
+              btn.classList.add("selected");
+            }
+            updateCount();
+          });
+
+          grid.appendChild(btn);
+        }
+      }
+
+      function updateCount(){
+        $("countSel").textContent = `Selecionados: ${selected.size}`;
+      }
+
+      function clearSelection(){
+        selected.clear();
+        document.querySelectorAll(".bichoBtn.selected").forEach(el => el.classList.remove("selected"));
+        updateCount();
+      }
+
+      renderButtons();
+      updateCount();
+
+      $("btnLimparSel").addEventListener("click", clearSelection);
+
+      $("btnAtualizar").addEventListener("click", () => {
+        const lista = $("lista").value || "";
+        const winners = Array.from(selected).sort((a,b)=>parseInt(a,10)-parseInt(b,10));
+        const res = updateList(lista, winners);
+
+        $("resultado").value = res.out;
+
+        const warns = [];
+        if(res.badLines.length){
+          warns.push("Linhas que não reconheci (verifique o formato):\n- " + res.badLines.join("\n- "));
+        }
+        if(res.badDays.length){
+          warns.push("Linhas com contagem inválida (use 'NN DIAS' ou 'ONTEM'):\n- " + res.badDays.join("\n- "));
+        }
+        if(res.missing.length){
+          warns.push("Atenção: alguns selecionados não estavam na lista colada:\n- " + res.missing.join(", "));
+        }
+        setMsg($("msgWarn"), warns.join("\n\n"));
+
+        const ok = [];
+        ok.push("Atualizado: +1 dia em todos; selecionados de hoje viraram ONTEM.");
+        if(res.winners.length) ok.push("Selecionados (hoje): " + res.winners.join(", "));
+        setMsg($("msgOk"), ok.join("\n"));
+      });
+
+      $("btnCopiar").addEventListener("click", async () => {
+        const text = $("resultado").value || "";
+        if(!text.trim()) return;
+
+        try{
+          await navigator.clipboard.writeText(text);
+          setMsg($("msgOk"), "Copiado para a área de transferência ✅");
+          setTimeout(()=>setMsg($("msgOk"), ""), 1400);
+        }catch(e){
+          $("resultado").focus();
+          $("resultado").select();
+          document.execCommand("copy");
+          setMsg($("msgOk"), "Copiado (modo compatibilidade) ✅");
+          setTimeout(()=>setMsg($("msgOk"), ""), 1400);
+        }
+      });
+
+      $("btnLimparTudo").addEventListener("click", () => {
+        $("lista").value = "";
+        $("resultado").value = "";
+        setMsg($("msgWarn"), "");
+        setMsg($("msgOk"), "");
+        clearSelection();
+      });
+
+      async function initPWA(){
+        const pill = $("pwaStatus");
+        try{
+          if(!("serviceWorker" in navigator)){
+            pill.textContent = "📦 PWA: sem suporte";
+            return;
+          }
+          const reg = await navigator.serviceWorker.register("./sw.js");
+          pill.textContent = reg.active ? "📦 PWA: pronto (cache ativo)" : "📦 PWA: pronto";
+        }catch(err){
+          pill.textContent = "📦 PWA: erro no registro";
+        }
+      }
+      initPWA();
+    })();
+  </script>
+</body>
+</html>
